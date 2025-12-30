@@ -157,7 +157,7 @@ export async function getGameDetails(initData: string, gameId: string): Promise<
             include: {
                 participants: {
                     orderBy: {
-                        createdAt: 'asc'
+                        name: 'asc'
                     }
                 }
             }

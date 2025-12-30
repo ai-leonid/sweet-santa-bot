@@ -3,13 +3,13 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { getCurrentUser } from '@/app/actions/auth';
 import { User } from '@prisma/client';
-import WebApp from '@twa-dev/sdk';
 
 interface TelegramContextType {
   user: User | null;
   isLoading: boolean;
   error: string | null;
   startParam: string | null;
+  webApp?: any;
 }
 
 const TelegramContext = createContext<TelegramContextType>({
@@ -17,6 +17,7 @@ const TelegramContext = createContext<TelegramContextType>({
   isLoading: true,
   error: null,
   startParam: null,
+  webApp: undefined,
 });
 
 export const useTelegram = () => useContext(TelegramContext);
@@ -26,12 +27,17 @@ export function TelegramProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [startParam, setStartParam] = useState<string | null>(null);
+  const [webApp, setWebApp] = useState<any>(undefined);
 
   useEffect(() => {
     const init = async () => {
       try {
         // Check if running in browser environment
         if (typeof window === 'undefined') return;
+
+        // Dynamically import Telegram WebApp SDK
+        const WebApp = (await import('@twa-dev/sdk')).default;
+        setWebApp(WebApp);
 
         // Initialize Telegram WebApp
         WebApp.ready();
@@ -72,7 +78,7 @@ export function TelegramProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <TelegramContext.Provider value={{ user, isLoading, error, startParam }}>
+    <TelegramContext.Provider value={{ user, isLoading, error, startParam, webApp }}>
       {children}
     </TelegramContext.Provider>
   );

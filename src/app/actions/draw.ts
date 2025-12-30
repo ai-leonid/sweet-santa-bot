@@ -118,7 +118,7 @@ export async function runDraw(initData: string, gameId: string): Promise<DrawRes
                 
                 await tx.participant.update({
                     where: { id: giver.id },
-                    data: { gifteeId: receiver.id }
+                    data: { receiverId: receiver.id }
                 });
             }
             
@@ -161,7 +161,7 @@ export async function getParticipantResult(initData: string, gameId: string, par
 
         const participant = await prisma.participant.findUnique({ 
             where: { id: participantId },
-            include: { giftee: true }
+            include: { receiver: true }
         });
 
         if (!participant) return { success: false, error: 'Participant not found' };
@@ -180,11 +180,11 @@ export async function getParticipantResult(initData: string, gameId: string, par
             return { success: false, error: 'Permission denied' };
         }
 
-        if (!participant.giftee) {
+        if (!participant.receiver) {
              return { success: false, error: 'No giftee assigned (Error)' };
         }
 
-        return { success: true, receiver: { name: participant.giftee.name } };
+        return { success: true, receiver: { name: participant.receiver.name } };
 
     } catch (error) {
         console.error('Get result error:', error);
