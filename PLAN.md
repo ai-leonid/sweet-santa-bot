@@ -60,23 +60,23 @@
 ## Фаза 3: Бэкенд логика (Server Actions / API)
 
 1.  **Telegram Auth & Middleware**
-    -   Реализовать валидацию `initData` от Telegram для безопасности.
-    -   Создать функцию `getCurrentUser`, которая создает или находит пользователя в БД при входе.
+    -   [x] Реализовать валидацию `initData` от Telegram для безопасности.
+    -   [x] Создать функцию `getCurrentUser`, которая создает или находит пользователя в БД при входе.
 
 2.  **Управление игрой**
-    -   `createGame(title)`: Создание новой игры.
-    -   `joinGame(inviteCode)`: Присоединение текущего пользователя к игре.
-    -   `addOfflinePlayer(gameId, name)`: Добавление оффлайн игрока создателем.
-    -   `getGameDetails(gameId)`: Получение списка участников и статуса.
+    -   [x] `createGame(title)`: Создание новой игры.
+    -   [x] `joinGame(inviteCode)`: Присоединение текущего пользователя к игре.
+    -   [x] `addOfflinePlayer(gameId, name)`: Добавление оффлайн игрока создателем.
+    -   [x] `getGameDetails(gameId)`: Получение списка участников и статуса.
 
 3.  **Управление исключениями (Стоп-лист)**
-    -   `addExclusion(gameId, whoId, whomId, mutual)`:
+    -   [x] `addExclusion(gameId, whoId, whomId, mutual)`:
         -   Добавляет запись `whoId -> whomId`.
         -   Если `mutual` (взаимоисключение), добавляет также `whomId -> whoId`.
-    -   `removeExclusion(exclusionId)`: Удаление правила.
+    -   [x] `removeExclusion(exclusionId)`: Удаление правила.
 
 4.  **Жеребьевка (Core Logic)**
-    -   `runDraw(gameId)`:
+    -   [x] `runDraw(gameId)`:
         -   Проверить права (только создатель).
         -   Получить всех участников и все исключения.
         -   Алгоритм: Найти такую перестановку, где каждый дарит ровно одному и получает от ровно одного, и нет нарушений исключений. (Использовать граф или бэктрекинг с рандомизацией).
