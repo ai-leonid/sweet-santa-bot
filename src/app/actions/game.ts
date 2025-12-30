@@ -51,6 +51,44 @@ export async function createGame(initData: string, title: string): Promise<Creat
   }
 }
 
+export type GetGamesResult = {
+  success: boolean;
+  games?: (Game & { _count: { participants: number } })[];
+  error?: string;
+};
+
+export async function getUserGames(initData: string): Promise<GetGamesResult> {
+  const auth = await getCurrentUser(initData);
+  if (!auth.success || !auth.user) {
+    return { success: false, error: 'Unauthorized' };
+  }
+
+  try {
+    const games = await prisma.game.findMany({
+      where: {
+        participants: {
+          some: {
+            userId: auth.user.id
+          }
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      },
+      include: {
+        _count: {
+          select: { participants: true }
+        }
+      }
+    });
+
+    return { success: true, games };
+  } catch (error) {
+    console.error('Get games error:', error);
+    return { success: false, error: 'Failed to fetch games' };
+  }
+}
+
 export type JoinGameResult = {
   success: boolean;
   game?: Game;
@@ -100,101 +138,87 @@ export async function joinGame(initData: string, inviteCode: string): Promise<Jo
   }
 }
 
-export type AddOfflinePlayerResult = {
+export type GetGameDetailsResult = {
   success: boolean;
-  participant?: Participant;
+  game?: Game & { participants: Participant[] };
   error?: string;
-};
-
-export async function addOfflinePlayer(initData: string, gameId: string, name: string): Promise<AddOfflinePlayerResult> {
-  const auth = await getCurrentUser(initData);
-  if (!auth.success || !auth.user) {
-    return { success: false, error: 'Unauthorized' };
-  }
-
-  try {
-    const game = await prisma.game.findUnique({
-      where: { id: gameId },
-    });
-
-    if (!game) {
-      return { success: false, error: 'Game not found' };
-    }
-
-    if (game.creatorId !== auth.user.id) {
-        return { success: false, error: 'Only creator can add offline players' };
-    }
-
-    if (game.status !== 'DRAFT') {
-        return { success: false, error: 'Game already started' };
-    }
-
-    const participant = await prisma.participant.create({
-      data: {
-        gameId: game.id,
-        name,
-        isOffline: true
-      }
-    });
-
-    return { success: true, participant };
-  } catch (error) {
-    console.error('Add offline player error:', error);
-    return { success: false, error: 'Failed to add player' };
-  }
-}
-
-export type GameDetailsResult = {
-  success: boolean;
-  game?: Game & { 
-    participants: Participant[], 
-    exclusions: any[] // We will type this properly later or let inference work
-  };
   isCreator?: boolean;
-  currentParticipant?: Participant;
-  error?: string;
 };
 
-export async function getGameDetails(initData: string, gameId: string): Promise<GameDetailsResult> {
+export async function getGameDetails(initData: string, gameId: string): Promise<GetGameDetailsResult> {
     const auth = await getCurrentUser(initData);
     if (!auth.success || !auth.user) {
-      return { success: false, error: 'Unauthorized' };
+        return { success: false, error: 'Unauthorized' };
     }
-  
+
     try {
-      const game = await prisma.game.findUnique({
-        where: { id: gameId },
-        include: {
-            participants: {
-                include: {
-                    user: true // maybe needed to show avatars
+        const game = await prisma.game.findUnique({
+            where: { id: gameId },
+            include: {
+                participants: {
+                    orderBy: {
+                        createdAt: 'asc'
+                    }
                 }
-            },
-            exclusions: true
+            }
+        });
+
+        if (!game) {
+            return { success: false, error: 'Game not found' };
         }
-      });
-  
-      if (!game) {
-        return { success: false, error: 'Game not found' };
-      }
 
-      const isCreator = game.creatorId === auth.user.id;
-      const currentParticipant = game.participants.find(p => p.userId === auth.user!.id);
+        // Check if user is participant
+        const isParticipant = game.participants.some(p => p.userId === auth.user!.id);
+        if (!isParticipant) {
+            return { success: false, error: 'You are not a participant of this game' };
+        }
 
-      // If not creator and not participant, maybe shouldn't see details? 
-      // Or maybe this is how they see "Join" screen?
-      // Assuming this is for inside the game lobby.
-
-      if (!isCreator && !currentParticipant) {
-          // If accessing via link but not joined yet, we might return limited info?
-          // For now, let's allow seeing basic info but maybe frontend handles the "Join" button.
-          // But typically "getGameDetails" implies authorized access to full game data.
-          // Let's return what we have.
-      }
-  
-      return { success: true, game, isCreator, currentParticipant };
+        return { 
+            success: true, 
+            game, 
+            isCreator: game.creatorId === auth.user.id 
+        };
     } catch (error) {
-      console.error('Get game details error:', error);
-      return { success: false, error: 'Failed to fetch game details' };
+        console.error('Get game details error:', error);
+        return { success: false, error: 'Failed to fetch game details' };
+    }
+}
+
+export async function addOfflineParticipant(initData: string, gameId: string, name: string) {
+    const auth = await getCurrentUser(initData);
+    if (!auth.success || !auth.user) {
+        return { success: false, error: 'Unauthorized' };
+    }
+
+    try {
+        const game = await prisma.game.findUnique({
+            where: { id: gameId },
+        });
+
+        if (!game) {
+            return { success: false, error: 'Game not found' };
+        }
+
+        if (game.creatorId !== auth.user.id) {
+            return { success: false, error: 'Only creator can add offline participants' };
+        }
+
+        if (game.status !== 'DRAFT') {
+            return { success: false, error: 'Game already started' };
+        }
+
+        const participant = await prisma.participant.create({
+            data: {
+                gameId,
+                name,
+                isOffline: true,
+                // userId is null for offline participants
+            }
+        });
+
+        return { success: true, participant };
+    } catch (error) {
+         console.error('Add offline participant error:', error);
+         return { success: false, error: 'Failed to add participant' };
     }
 }

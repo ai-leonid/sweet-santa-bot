@@ -106,31 +106,88 @@ export async function runDraw(initData: string, gameId: string): Promise<DrawRes
     }
 
     if (!success) {
-        return { success: false, error: 'Could not find a valid arrangement matching all exclusions. Try removing some restrictions.' };
+        return { success: false, error: 'Could not find a valid assignment matching all exclusions. Try removing some restrictions.' };
     }
 
-    // Apply the result to DB transactionally
-    await prisma.$transaction(async (tx) => {
-        for (let j = 0; j < resultChain.length; j++) {
-            const giver = resultChain[j];
-            const receiver = resultChain[(j + 1) % resultChain.length];
+    // Save results in a transaction
+    try {
+        await prisma.$transaction(async (tx) => {
+            for (let j = 0; j < resultChain.length; j++) {
+                const giver = resultChain[j];
+                const receiver = resultChain[(j + 1) % resultChain.length];
+                
+                await tx.participant.update({
+                    where: { id: giver.id },
+                    data: { gifteeId: receiver.id }
+                });
+            }
             
-            await tx.participant.update({
-                where: { id: giver.id },
-                data: { receiverId: receiver.id }
+            await tx.game.update({
+                where: { id: gameId },
+                data: { status: 'COMPLETED' }
             });
-        }
-
-        await tx.game.update({
-            where: { id: gameId },
-            data: { status: 'STARTED' }
         });
-    });
 
-    return { success: true };
-
+        return { success: true };
+    } catch (e) {
+        console.error('Transaction failed', e);
+        return { success: false, error: 'Failed to save results' };
+    }
   } catch (error) {
-    console.error('Run draw error:', error);
+    console.error('Draw error:', error);
     return { success: false, error: 'Failed to run draw' };
   }
+}
+
+export type GetResultResponse = {
+  success: boolean;
+  receiver?: { name: string };
+  error?: string;
+};
+
+export async function getParticipantResult(initData: string, gameId: string, participantId: string): Promise<GetResultResponse> {
+    const auth = await getCurrentUser(initData);
+    if (!auth.success || !auth.user) {
+        return { success: false, error: 'Unauthorized' };
+    }
+
+    try {
+        const game = await prisma.game.findUnique({ where: { id: gameId } });
+        if (!game) return { success: false, error: 'Game not found' };
+
+        if (game.status !== 'COMPLETED') {
+             return { success: false, error: 'Game not completed yet' };
+        }
+
+        const participant = await prisma.participant.findUnique({ 
+            where: { id: participantId },
+            include: { giftee: true }
+        });
+
+        if (!participant) return { success: false, error: 'Participant not found' };
+
+        // Permission check
+        const isCreator = game.creatorId === auth.user.id;
+        const isSelf = participant.userId === auth.user.id;
+        // Offline players results can be seen by creator
+        const isOffline = participant.isOffline;
+
+        if (isSelf) {
+            // OK
+        } else if (isCreator && isOffline) {
+            // OK
+        } else {
+            return { success: false, error: 'Permission denied' };
+        }
+
+        if (!participant.giftee) {
+             return { success: false, error: 'No giftee assigned (Error)' };
+        }
+
+        return { success: true, receiver: { name: participant.giftee.name } };
+
+    } catch (error) {
+        console.error('Get result error:', error);
+        return { success: false, error: 'Failed to fetch result' };
+    }
 }

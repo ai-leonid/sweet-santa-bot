@@ -153,3 +153,51 @@ export async function removeExclusion(initData: string, exclusionId: string): Pr
       return { success: false, error: 'Failed to remove exclusion' };
     }
 }
+
+export type GetExclusionsResult = {
+  success: boolean;
+  exclusions?: (Exclusion & { whom: { name: string } })[];
+  error?: string;
+};
+
+export async function getExclusions(initData: string, gameId: string, participantId: string): Promise<GetExclusionsResult> {
+    const auth = await getCurrentUser(initData);
+    if (!auth.success || !auth.user) {
+        return { success: false, error: 'Unauthorized' };
+    }
+
+    try {
+        const game = await prisma.game.findUnique({ where: { id: gameId } });
+        if (!game) return { success: false, error: 'Game not found' };
+
+        // Permission check: Creator or Self
+        // We need to know if participantId belongs to auth.user
+        const participant = await prisma.participant.findUnique({ where: { id: participantId } });
+        if (!participant) return { success: false, error: 'Participant not found' };
+
+        const isCreator = game.creatorId === auth.user.id;
+        const isSelf = participant.userId === auth.user.id;
+
+        if (!isCreator && !isSelf) {
+            return { success: false, error: 'Permission denied' };
+        }
+
+        const exclusions = await prisma.exclusion.findMany({
+            where: {
+                gameId,
+                whoId: participantId
+            },
+            include: {
+                whom: {
+                    select: { name: true }
+                }
+            }
+        });
+
+        return { success: true, exclusions };
+
+    } catch (error) {
+        console.error('Get exclusions error:', error);
+        return { success: false, error: 'Failed to fetch exclusions' };
+    }
+}
