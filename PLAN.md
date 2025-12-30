@@ -5,22 +5,22 @@
 ## Фаза 1: Настройка окружения и зависимостей
 
 1.  **Инициализация стека**
-    -   Убедиться, что Node.js установлен.
+    -   [x] Убедиться, что Node.js установлен.
     -   Установить необходимые пакеты:
-        -   `prisma` (dev), `@prisma/client`
-        -   `shadcn-ui` (init)
-        -   `lucide-react` (иконки)
-        -   `clsx`, `tailwind-merge` (утилиты для стилей)
-        -   `@twa-dev/sdk` (или аналог для работы с Telegram WebApp)
-        -   `zod` (валидация)
+        -   [x] `prisma` (dev), `@prisma/client`
+        -   [x] `shadcn-ui` (init)
+        -   [x] `lucide-react` (иконки)
+        -   [x] `clsx`, `tailwind-merge` (утилиты для стилей)
+        -   [x] `@twa-dev/sdk` (или аналог для работы с Telegram WebApp)
+        -   [x] `zod` (валидация)
 
 2.  **Настройка базы данных**
-    -   Настроить подключение к PostgreSQL в `.env`.
-    -   Инициализировать Prisma: `npx prisma init`.
+    -   [x] Настроить подключение к PostgreSQL в `.env`.
+    -   [x] Инициализировать Prisma: `npx prisma init`.
 
 3.  **Настройка UI**
-    -   Инициализировать shadcn/ui.
-    -   Добавить базовые компоненты: Button, Input, Card, Dialog, Checkbox, Select, Toast (для уведомлений), Avatar.
+    -   [x] Инициализировать shadcn/ui.
+    -   [x] Добавить базовые компоненты: Button, Input, Card, Dialog, Checkbox, Select, Toast (sonner), Avatar.
 
 ## Фаза 2: Проектирование Базы Данных (Prisma Schema)
 
