@@ -1,14 +1,80 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+model User {
+  id         String   @id @default(uuid())
+  telegramId String   @unique
+  username   String?
+  firstName  String?
+  lastName   String?
+  createdAt  DateTime @default(now())
+
+  createdGames   Game[]        @relation("GameCreator")
+  participations Participant[]
+
+  @@map("users")
+}
+
+model Game {
+  id         String     @id @default(uuid())
+  title      String
+  creatorId  String
+  creator    User       @relation("GameCreator", fields: [creatorId], references: [id])
+  status     GameStatus @default(DRAFT)
+  inviteCode String     @unique
+  createdAt  DateTime   @default(now())
+
+  participants Participant[]
+  exclusions   Exclusion[]
+
+  @@map("games")
+}
+
+enum GameStatus {
+  DRAFT
+  STARTED
+  COMPLETED
+}
+
+model Participant {
+  id        String  @id @default(uuid())
+  gameId    String
+  game      Game    @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  userId    String?
+  user      User?   @relation(fields: [userId], references: [id])
+  name      String
+  isOffline Boolean @default(false)
+
+  // Santa logic: who gives to whom
+  // receiverId points to the participant THIS participant gives a gift to
+  receiverId String?      @unique
+  receiver   Participant? @relation("GiftConnection", fields: [receiverId], references: [id])
+  
+  // giver is the participant who gives a gift to THIS participant
+  giver      Participant? @relation("GiftConnection")
+
+  exclusionsWho  Exclusion[] @relation("ExclusionWho")
+  exclusionsWhom Exclusion[] @relation("ExclusionWhom")
+
+  @@map("participants")
+}
+
+model Exclusion {
+  id     String @id @default(uuid())
+  gameId String
+  game   Game   @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  whoId String
+  who   Participant @relation("ExclusionWho", fields: [whoId], references: [id], onDelete: Cascade)
+
+  whomId String
+  whom   Participant @relation("ExclusionWhom", fields: [whomId], references: [id], onDelete: Cascade)
+
+  @@unique([whoId, whomId])
+  @@map("exclusions")
 }

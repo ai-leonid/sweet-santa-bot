@@ -26,14 +26,14 @@
 
 Необходимо создать следующие модели:
 
-1.  **User (Пользователь Telegram)**
+1.  **User (Пользователь Telegram)** [x]
     -   `telegramId` (BigInt/String, уникальный)
     -   `username` (String)
     -   `firstName` (String)
     -   `lastName` (String)
     -   `createdAt`
 
-2.  **Game (Игра/Жеребьевка)**
+2.  **Game (Игра/Жеребьевка)** [x]
     -   `id` (UUID)
     -   `title` (String)
     -   `creatorId` (User relation)
@@ -41,7 +41,7 @@
     -   `inviteCode` (String, уникальный для ссылки)
     -   `createdAt`
 
-3.  **Participant (Участник игры)**
+3.  **Participant (Участник игры)** [x]
     -   `id` (UUID)
     -   `gameId` (Game relation)
     -   `userId` (User relation, nullable - если null, это оффлайн игрок)
@@ -50,7 +50,7 @@
     -   `giverId` (Participant relation - кто дарит этому участнику, заполняется после жеребьевки)
     -   `receiverId` (Participant relation - кому дарит этот участник, заполняется после жеребьевки)
 
-4.  **Exclusion (Стоп-лист)**
+4.  **Exclusion (Стоп-лист)** [x]
     -   `id` (UUID)
     -   `gameId` (Game relation)
     -   `whoId` (Participant relation - КТО не может дарить)
