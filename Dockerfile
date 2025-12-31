@@ -21,6 +21,7 @@ RUN npm ci
 FROM deps AS builder
 WORKDIR /app
 COPY prisma ./prisma
+COPY prisma.config.ts ./prisma.config.ts
 COPY next.config.ts ./next.config.ts
 COPY tsconfig.json ./tsconfig.json
 COPY postcss.config.mjs ./postcss.config.mjs
@@ -29,7 +30,6 @@ COPY components.json ./components.json
 COPY src ./src
 COPY public ./public
 RUN npx prisma generate
-RUN npx prisma migrate dev
 ENV NODE_ENV=production
 RUN npm run build
 
@@ -41,6 +41,7 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
 EXPOSE 3000
 ENV PORT=3000
-CMD ["npm", "start", "--", "-p", "3000"]
+CMD ["sh","-c","npx prisma migrate deploy && npm run start -- -p 3000"]
