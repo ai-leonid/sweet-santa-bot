@@ -34,7 +34,7 @@ export function ResultsView({ gameId, participant }: ResultsViewProps) {
       setReceiverName(result.receiver.name);
       setIsRevealed(true);
     } else {
-      toast.error(result.error || 'Failed to reveal result');
+      toast.error(result.error || 'Не удалось показать результат');
     }
     setIsLoading(false);
   };
@@ -49,7 +49,7 @@ export function ResultsView({ gameId, participant }: ResultsViewProps) {
         >
             <span className="flex items-center gap-2">
                 <Gift className="h-4 w-4 text-purple-500" />
-                {participant.isOffline ? `Result for ${participant.name}` : "Your Result"}
+                {participant.isOffline ? `Результат для ${participant.name}` : "Ваш результат"}
             </span>
             {isLoading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -63,7 +63,7 @@ export function ResultsView({ gameId, participant }: ResultsViewProps) {
         {isRevealed && receiverName && (
             <div className="mt-2 p-4 bg-muted/50 rounded-lg text-center animate-in fade-in zoom-in duration-300 border border-purple-200 dark:border-purple-900">
                 <p className="text-sm text-muted-foreground mb-1">
-                   {participant.isOffline ? `${participant.name} is gifting to:` : "You are the Secret Santa for:"}
+                   {participant.isOffline ? `${participant.name} дарит подарок:` : "Вы Тайный Санта для:"}
                 </p>
                 <p className="text-xl font-bold text-purple-600 dark:text-purple-400">{receiverName}</p>
             </div>

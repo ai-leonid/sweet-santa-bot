@@ -37,10 +37,10 @@ export default function GameLobbyPage() {
         setGame(result.game);
         setIsCreator(!!result.isCreator);
       } else {
-        toast.error(result.error || 'Failed to load game');
+        toast.error(result.error || 'Не удалось загрузить игру');
       }
     } catch (error) {
-      toast.error('Something went wrong');
+      toast.error('Что-то пошло не так');
     } finally {
       setIsLoading(false);
     }
@@ -66,26 +66,26 @@ export default function GameLobbyPage() {
     const link = `https://t.me/${process.env.NEXT_PUBLIC_BOT_USERNAME || 'SweetSantaBot'}?startapp=${game.inviteCode}`;
     
     if (webApp) {
-        webApp.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(`Join my Secret Santa game: ${game.title}!`)}`);
+        webApp.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(`Присоединяйся к моей игре «Тайный Санта»: ${game.title}!`)}`);
     } else {
         navigator.clipboard.writeText(link);
-        toast.success('Link copied to clipboard');
+        toast.success('Ссылка скопирована в буфер обмена');
     }
   };
 
   const handleDraw = async () => {
     if (!webApp?.initData || !game) return;
     
-    if (!confirm('Are you sure you want to start the draw? This cannot be undone.')) return;
+    if (!confirm('Вы уверены, что хотите начать жеребьевку? Это действие нельзя отменить.')) return;
 
     setIsDrawLoading(true);
     const result = await runDraw(webApp.initData, game.id);
     
     if (result.success) {
-      toast.success('Draw completed! Everyone has been assigned a giftee.');
+      toast.success('Жеребьевка завершена! Всем назначены подопечные.');
       loadGame(); // Reload to show results view
     } else {
-      toast.error(result.error || 'Failed to run draw');
+      toast.error(result.error || 'Не удалось запустить жеребьевку');
     }
     setIsDrawLoading(false);
   };
@@ -102,15 +102,20 @@ export default function GameLobbyPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen p-4 text-center">
         <ShieldAlert className="h-12 w-12 text-destructive mb-4" />
-        <h2 className="text-xl font-bold">Game not found</h2>
-        <p className="text-muted-foreground mt-2">Could not load game details.</p>
-        <Button onClick={() => router.push('/')} className="mt-4">Go Home</Button>
+        <h2 className="text-xl font-bold">Игра не найдена</h2>
+        <p className="text-muted-foreground mt-2">Не удалось загрузить данные игры.</p>
+        <Button onClick={() => router.push('/')} className="mt-4">На главную</Button>
       </div>
     );
   }
 
   const isDraft = game.status === 'DRAFT';
   const isCompleted = game.status === 'COMPLETED';
+  const statusLabel = (status: string) => {
+    if (status === 'DRAFT') return 'Черновик';
+    if (status === 'COMPLETED') return 'Завершена';
+    return status;
+  };
   
   // Find current user's participant record
   const myParticipant = game.participants.find(p => p.userId === telegramUser?.id);
@@ -120,7 +125,7 @@ export default function GameLobbyPage() {
       <div className="flex flex-col items-center space-y-2">
         <h1 className="text-2xl font-bold text-center">{game.title}</h1>
         <Badge variant={isDraft ? "secondary" : "default"}>
-          {game.status}
+          {statusLabel(game.status)}
         </Badge>
       </div>
 
@@ -129,7 +134,7 @@ export default function GameLobbyPage() {
           <CardContent className="pt-6 space-y-4">
              <Button className="w-full" onClick={handleShare} variant="outline">
                <Share2 className="mr-2 h-4 w-4" />
-               Invite Participants
+               Пригласить участников
              </Button>
              
              <AddOfflineParticipantDialog gameId={game.id} onSuccess={loadGame} />
@@ -141,11 +146,11 @@ export default function GameLobbyPage() {
                 variant="default"
              >
                {isDrawLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Shuffle className="mr-2 h-4 w-4" />}
-               Start Draw
+               Начать жеребьевку
              </Button>
              {game.participants.length < 3 && (
                 <p className="text-xs text-center text-muted-foreground">
-                    Need at least 3 participants to start.
+                    Чтобы начать, нужно минимум 3 участника.
                 </p>
              )}
           </CardContent>
@@ -155,7 +160,7 @@ export default function GameLobbyPage() {
       {isCompleted && myParticipant && (
          <Card className="border-primary/50 bg-primary/5">
             <CardHeader>
-                <CardTitle className="text-center">Your Result</CardTitle>
+                <CardTitle className="text-center">Ваш результат</CardTitle>
             </CardHeader>
             <CardContent>
                 <ResultsView gameId={game.id} participant={myParticipant} />
@@ -167,7 +172,7 @@ export default function GameLobbyPage() {
         <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold flex items-center">
                 <Users className="mr-2 h-5 w-5" />
-                Participants ({game.participants.length})
+                Участники ({game.participants.length})
             </h2>
         </div>
 
@@ -184,7 +189,7 @@ export default function GameLobbyPage() {
                   <div>
                     <p className="font-medium">{participant.name}</p>
                     {participant.isOffline && (
-                        <span className="text-xs text-muted-foreground bg-secondary px-1.5 py-0.5 rounded">Offline</span>
+                        <span className="text-xs text-muted-foreground bg-secondary px-1.5 py-0.5 rounded">Оффлайн</span>
                     )}
                   </div>
                 </div>

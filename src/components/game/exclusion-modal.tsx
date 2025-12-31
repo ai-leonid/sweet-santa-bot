@@ -57,12 +57,12 @@ export function ExclusionModal({ gameId, participant, allParticipants, trigger }
     );
     
     if (result.success) {
-      toast.success('Exclusion added');
+      toast.success('Исключение добавлено');
       setSelectedParticipantId('');
       setIsMutual(false);
       loadExclusions();
     } else {
-      toast.error(result.error || 'Failed to add exclusion');
+      toast.error(result.error || 'Не удалось добавить исключение');
     }
     setIsAdding(false);
   };
@@ -75,7 +75,7 @@ export function ExclusionModal({ gameId, participant, allParticipants, trigger }
     
     const result = await removeExclusion(webApp.initData, id);
     if (!result.success) {
-      toast.error(result.error || 'Failed to remove exclusion');
+      toast.error(result.error || 'Не удалось удалить исключение');
       loadExclusions(); // Revert
     }
   };
@@ -93,16 +93,16 @@ export function ExclusionModal({ gameId, participant, allParticipants, trigger }
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Exclusions for {participant.name}</DialogTitle>
+          <DialogTitle>Стоп-лист для {participant.name}</DialogTitle>
         </DialogHeader>
         
         <div className="space-y-4 py-4">
             <div className="space-y-2">
-                <Label>Who cannot receive a gift from {participant.name}?</Label>
+                <Label>Кому {participant.name} не должен дарить?</Label>
                 <div className="flex gap-2">
                     <Select value={selectedParticipantId} onValueChange={setSelectedParticipantId}>
                         <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Select participant" />
+                            <SelectValue placeholder="Выберите участника" />
                         </SelectTrigger>
                         <SelectContent>
                             {availableParticipants.map(p => (
@@ -116,19 +116,19 @@ export function ExclusionModal({ gameId, participant, allParticipants, trigger }
                 </div>
                 <div className="flex items-center space-x-2 pt-2">
                     <Checkbox id="mutual" checked={isMutual} onCheckedChange={(c) => setIsMutual(!!c)} />
-                    <Label htmlFor="mutual">Mutual exclusion (also prevent receiving)</Label>
+                    <Label htmlFor="mutual">Взаимное исключение (запретить дарить друг другу)</Label>
                 </div>
             </div>
 
             <div className="border-t pt-4">
-                <h4 className="text-sm font-medium mb-2">Current Exclusions</h4>
+                <h4 className="text-sm font-medium mb-2">Текущие исключения</h4>
                 {isLoading ? (
                     <div className="flex justify-center"><Loader2 className="h-4 w-4 animate-spin" /></div>
                 ) : exclusions.length > 0 ? (
                     <ul className="space-y-2">
                         {exclusions.map(ex => (
                             <li key={ex.id} className="flex items-center justify-between bg-muted p-2 rounded-md text-sm">
-                                <span>Cannot gift to <strong>{ex.whom.name}</strong></span>
+                                <span>Не может дарить: <strong>{ex.whom.name}</strong></span>
                                 <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive" onClick={() => handleRemove(ex.id)}>
                                     <Trash2 className="h-3 w-3" />
                                 </Button>
@@ -136,7 +136,7 @@ export function ExclusionModal({ gameId, participant, allParticipants, trigger }
                         ))}
                     </ul>
                 ) : (
-                    <p className="text-sm text-muted-foreground">No exclusions set.</p>
+                    <p className="text-sm text-muted-foreground">Стоп-лист пуст.</p>
                 )}
             </div>
         </div>

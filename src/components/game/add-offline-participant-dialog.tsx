@@ -31,13 +31,13 @@ export function AddOfflineParticipantDialog({ gameId, onSuccess }: AddOfflinePar
     const result = await addOfflineParticipant(webApp.initData, gameId, name.trim());
     
     if (result.success) {
-      toast.success('Participant added');
+      toast.success('Участник добавлен');
       setName('');
       setIsOpen(false);
       onSuccess?.();
       router.refresh();
     } else {
-      toast.error(result.error || 'Failed to add participant');
+      toast.error(result.error || 'Не удалось добавить участника');
     }
     setIsLoading(false);
   };
@@ -47,19 +47,19 @@ export function AddOfflineParticipantDialog({ gameId, onSuccess }: AddOfflinePar
       <DialogTrigger asChild>
         <Button variant="outline" className="w-full">
           <UserPlus className="mr-2 h-4 w-4" />
-          Add Offline Participant
+          Добавить оффлайн-участника
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add Offline Participant</DialogTitle>
+          <DialogTitle>Добавить оффлайн-участника</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 py-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Name</Label>
+            <Label htmlFor="name">Имя</Label>
             <Input
               id="name"
-              placeholder="e.g. Grandma"
+              placeholder="например: Бабушка"
               value={name}
               onChange={(e) => setName(e.target.value)}
               disabled={isLoading}
@@ -67,7 +67,7 @@ export function AddOfflineParticipantDialog({ gameId, onSuccess }: AddOfflinePar
           </div>
           <Button type="submit" className="w-full" disabled={isLoading || !name.trim()}>
             {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-            Add Participant
+            Добавить участника
           </Button>
         </form>
       </DialogContent>

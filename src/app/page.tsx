@@ -46,7 +46,7 @@ export default function Home() {
     if (result.success && result.games) {
       setGames(result.games);
     } else {
-      toast.error('Failed to load games');
+      toast.error('Не удалось загрузить игры');
     }
     setIsLoadingGames(false);
   };
@@ -61,7 +61,7 @@ export default function Home() {
     setIsCreating(false);
 
     if (result.success && result.game) {
-      toast.success('Game created!');
+      toast.success('Игра создана!');
       setNewGameTitle('');
       setIsDialogOpen(false);
       // Refresh list
@@ -69,7 +69,7 @@ export default function Home() {
       // Optionally navigate to game
       // router.push(`/game/${result.game.id}`);
     } else {
-      toast.error(result.error || 'Failed to create game');
+      toast.error(result.error || 'Не удалось создать игру');
     }
   };
 
@@ -78,16 +78,16 @@ export default function Home() {
     setIsJoinProcessing(true);
 
     // Show a toast that we are joining
-    const toastId = toast.loading('Joining game...');
+    const toastId = toast.loading('Присоединение к игре...');
 
     const result = await joinGame(webApp.initData, inviteCode);
     setIsJoinProcessing(false);
 
     if (result.success && result.game) {
-      toast.success('Joined game!', { id: toastId });
+      toast.success('Вы присоединились к игре!', { id: toastId });
       router.push(`/game/${result.game.id}`);
     } else {
-      toast.error(result.error || 'Failed to join game', { id: toastId });
+      toast.error(result.error || 'Не удалось присоединиться к игре', { id: toastId });
       // If failed, maybe we should just stay on home page
     }
   };
@@ -100,10 +100,16 @@ export default function Home() {
     );
   }
 
+  const statusLabel = (status: string) => {
+    if (status === 'DRAFT') return 'Черновик';
+    if (status === 'COMPLETED') return 'Завершена';
+    return status;
+  };
+
   return (
     <main className="container mx-auto p-4 max-w-md min-h-screen flex flex-col gap-6">
       <header className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">My Games</h1>
+        <h1 className="text-2xl font-bold">Мои игры</h1>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button size="icon">
@@ -112,11 +118,11 @@ export default function Home() {
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Create New Game</DialogTitle>
+              <DialogTitle>Создать игру</DialogTitle>
             </DialogHeader>
             <div className="py-4">
               <Input
-                placeholder="Game Title (e.g. Office Party 2024)"
+                placeholder="Название игры (например: Офисный праздник 2024)"
                 value={newGameTitle}
                 onChange={(e) => setNewGameTitle(e.target.value)}
                 onKeyDown={(e) => {
@@ -127,7 +133,7 @@ export default function Home() {
             <DialogFooter>
               <Button onClick={handleCreateGame} disabled={isCreating}>
                 {isCreating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                Create
+                Создать
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -153,14 +159,14 @@ export default function Home() {
                      <span className={`text-xs px-2 py-1 rounded-full ${
                         game.status === 'DRAFT' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100' : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100'
                      }`}>
-                        {game.status}
+                        {statusLabel(game.status)}
                      </span>
                   )}
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center text-sm text-muted-foreground">
                     <Users className="mr-1 h-4 w-4" />
-                    {game._count.participants} participants
+                    {game._count.participants} участников
                   </div>
                 </CardContent>
               </Card>
@@ -170,8 +176,8 @@ export default function Home() {
       ) : (
         <div className="flex flex-col items-center justify-center py-12 text-center text-muted-foreground">
           <Gift className="h-12 w-12 mb-4 opacity-20" />
-          <p>No games yet.</p>
-          <p className="text-sm">Create one to get started!</p>
+          <p>Игр пока нет.</p>
+          <p className="text-sm">Создайте игру, чтобы начать!</p>
         </div>
       )}
     </main>
