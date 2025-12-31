@@ -1,4 +1,4 @@
-FROM node:22.14.0-alpine3.20 AS base
+FROM node:20-alpine AS base
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
@@ -14,6 +14,7 @@ ENV TELEGRAM_BOT_LINK=${TELEGRAM_BOT_LINK}
 
 FROM base AS deps
 RUN apk add --no-cache libc6-compat
+ENV NODE_ENV=development
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
@@ -28,8 +29,8 @@ COPY eslint.config.mjs ./eslint.config.mjs
 COPY components.json ./components.json
 COPY src ./src
 COPY public ./public
-RUN npx prisma migrate deploy
 RUN npx prisma generate
+ENV NODE_ENV=production
 RUN npm run build
 
 FROM base AS runner
