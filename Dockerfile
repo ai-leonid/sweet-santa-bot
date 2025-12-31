@@ -2,7 +2,6 @@ FROM node:20-alpine AS base
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
-
 ARG DATABASE_URL=DATABASE_URL
 ENV DATABASE_URL=${DATABASE_URL}
 
@@ -18,6 +17,7 @@ ENV NODE_ENV=development
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
+RUN npx prisma migrate dev
 
 FROM deps AS builder
 WORKDIR /app
@@ -43,4 +43,4 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/prisma ./prisma
 EXPOSE 3000
 ENV PORT=3000
-CMD ["sh","-c","npx prisma migrate deploy && npm run start"]
+CMD ["npm", "start", "--", "-p", "3000"]
