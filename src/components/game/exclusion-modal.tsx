@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Participant, Exclusion } from '@prisma/client';
+import { Participant, Exclusion } from '@/app/generated/prisma/client';
 import { addExclusion, removeExclusion, getExclusions } from '@/app/actions/exclusion';
 import { useTelegram } from '@/components/providers/telegram-provider';
 import { toast } from 'sonner';

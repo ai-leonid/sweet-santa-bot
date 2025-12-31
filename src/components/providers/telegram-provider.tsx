@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { getCurrentUser } from '@/app/actions/auth';
-import { User } from '@prisma/client';
+import { User } from '@/app/generated/prisma/client';
 
 interface TelegramContextType {
   user: User | null;

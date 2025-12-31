@@ -2,7 +2,7 @@
 
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from './auth';
-import { Exclusion } from '@prisma/client';
+import { Exclusion } from '@/app/generated/prisma/client';
 
 export type AddExclusionResult = {
   success: boolean;

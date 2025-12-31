@@ -2,7 +2,7 @@
 
 import { prisma } from '@/lib/prisma';
 import { validateTelegramWebAppData } from '@/lib/telegram-auth';
-import { User } from '@prisma/client';
+import { User } from '@/app/generated/prisma/client';
 
 export type AuthResult = {
   success: boolean;

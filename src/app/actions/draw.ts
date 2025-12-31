@@ -2,7 +2,7 @@
 
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from './auth';
-import { GameStatus } from '@prisma/client';
+import { GameStatus } from '@/app/generated/prisma/client';
 
 export type DrawResult = {
   success: boolean;

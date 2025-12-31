@@ -21,7 +21,7 @@ export default function Home() {
   const [isJoinProcessing, setIsJoinProcessing] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const router = useRouter();
-  
+
   // Use a ref to track if we've already attempted to join with this startParam
   // to prevent double submissions in React Strict Mode or re-renders
   const hasAttemptedJoin = useRef(false);
@@ -52,8 +52,10 @@ export default function Home() {
   };
 
   const handleCreateGame = async () => {
+    console.log('----------HERE ADAF8D7D52DCAE3');
+    console.log(webApp.initData);
     if (!newGameTitle.trim() || !webApp?.initData) return;
-    
+
     setIsCreating(true);
     const result = await createGame(webApp.initData, newGameTitle);
     setIsCreating(false);
@@ -74,10 +76,10 @@ export default function Home() {
   const handleJoinGame = async (inviteCode: string) => {
     if (!webApp?.initData) return;
     setIsJoinProcessing(true);
-    
+
     // Show a toast that we are joining
     const toastId = toast.loading('Joining game...');
-    
+
     const result = await joinGame(webApp.initData, inviteCode);
     setIsJoinProcessing(false);
 
@@ -113,8 +115,8 @@ export default function Home() {
               <DialogTitle>Create New Game</DialogTitle>
             </DialogHeader>
             <div className="py-4">
-              <Input 
-                placeholder="Game Title (e.g. Office Party 2024)" 
+              <Input
+                placeholder="Game Title (e.g. Office Party 2024)"
                 value={newGameTitle}
                 onChange={(e) => setNewGameTitle(e.target.value)}
                 onKeyDown={(e) => {

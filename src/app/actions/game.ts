@@ -2,7 +2,7 @@
 
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from './auth';
-import { Game, Participant, GameStatus } from '@prisma/client';
+import { Game, Participant, GameStatus } from '@/app/generated/prisma/client';
 import { randomBytes } from 'crypto';
 
 // Helper to generate a unique short invite code

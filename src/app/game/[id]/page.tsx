@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useTelegram } from '@/components/providers/telegram-provider';
 import { getGameDetails } from '@/app/actions/game';
 import { runDraw } from '@/app/actions/draw';
-import { Game, Participant } from '@prisma/client';
+import { Game, Participant } from '@/app/generated/prisma/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';

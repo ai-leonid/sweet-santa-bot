@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Participant } from '@prisma/client';
+import { Participant } from '@/app/generated/prisma/client';
 import { getParticipantResult } from '@/app/actions/draw';
 import { useTelegram } from '@/components/providers/telegram-provider';
 import { Eye, EyeOff, Gift, Loader2 } from 'lucide-react';
