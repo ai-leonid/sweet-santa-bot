@@ -1,6 +1,16 @@
-FROM node:20-alpine AS base
+FROM node:22.14.0-alpine3.20 AS base
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
+
+
+ARG DATABASE_URL=DATABASE_URL
+ENV DATABASE_URL=${DATABASE_URL}
+
+ARG TELEGRAM_BOT_TOKEN=TELEGRAM_BOT_TOKEN
+ENV TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+
+ARG TELEGRAM_BOT_LINK=TELEGRAM_BOT_LINK
+ENV TELEGRAM_BOT_LINK=${TELEGRAM_BOT_LINK}
 
 FROM base AS deps
 RUN apk add --no-cache libc6-compat
@@ -18,6 +28,7 @@ COPY eslint.config.mjs ./eslint.config.mjs
 COPY components.json ./components.json
 COPY src ./src
 COPY public ./public
+RUN npx prisma migrate deploy
 RUN npx prisma generate
 RUN npm run build
 
