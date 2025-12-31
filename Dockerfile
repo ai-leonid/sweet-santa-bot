@@ -17,7 +17,6 @@ ENV NODE_ENV=development
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
-RUN npx prisma migrate dev
 
 FROM deps AS builder
 WORKDIR /app
@@ -30,6 +29,7 @@ COPY components.json ./components.json
 COPY src ./src
 COPY public ./public
 RUN npx prisma generate
+RUN npx prisma migrate dev
 ENV NODE_ENV=production
 RUN npm run build
 
