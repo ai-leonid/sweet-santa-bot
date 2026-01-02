@@ -20,7 +20,7 @@ export default function GameLobbyPage() {
   const params = useParams();
   const router = useRouter();
   const { webApp, user: telegramUser } = useTelegram();
-  
+
   const [game, setGame] = useState<Game & { participants: Participant[] } | null>(null);
   const [isCreator, setIsCreator] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -30,7 +30,7 @@ export default function GameLobbyPage() {
 
   const loadGame = useCallback(async () => {
     if (!webApp?.initData || !gameId) return;
-    
+
     try {
       const result = await getGameDetails(webApp.initData, gameId);
       if (result.success && result.game) {
@@ -52,7 +52,7 @@ export default function GameLobbyPage() {
         webApp.BackButton.onClick(() => router.push('/'));
     }
     loadGame();
-    
+
     return () => {
         if (webApp) {
             webApp.BackButton.hide();
@@ -63,8 +63,8 @@ export default function GameLobbyPage() {
 
   const handleShare = () => {
     if (!game) return;
-    const link = `https://t.me/${process.env.NEXT_PUBLIC_BOT_USERNAME || 'SweetSantaBot'}?startapp=${game.inviteCode}`;
-    
+    const link = `https://t.me/${process.env.NEXT_PUBLIC_TELEGRAM_BOT_NAME || 'sweet_santa_bot'}?startapp=${game.inviteCode}`;
+
     if (webApp) {
         webApp.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(`Присоединяйся к моей игре «Тайный Санта»: ${game.title}!`)}`);
     } else {
@@ -75,12 +75,12 @@ export default function GameLobbyPage() {
 
   const handleDraw = async () => {
     if (!webApp?.initData || !game) return;
-    
+
     if (!confirm('Вы уверены, что хотите начать жеребьевку? Это действие нельзя отменить.')) return;
 
     setIsDrawLoading(true);
     const result = await runDraw(webApp.initData, game.id);
-    
+
     if (result.success) {
       toast.success('Жеребьевка завершена! Всем назначены подопечные.');
       loadGame(); // Reload to show results view
@@ -116,7 +116,7 @@ export default function GameLobbyPage() {
     if (status === 'COMPLETED') return 'Завершена';
     return status;
   };
-  
+
   // Find current user's participant record
   const myParticipant = game.participants.find(p => p.userId === telegramUser?.id);
 
@@ -136,12 +136,12 @@ export default function GameLobbyPage() {
                <Share2 className="mr-2 h-4 w-4" />
                Пригласить участников
              </Button>
-             
+
              <AddOfflineParticipantDialog gameId={game.id} onSuccess={loadGame} />
-             
-             <Button 
-                className="w-full" 
-                onClick={handleDraw} 
+
+             <Button
+                className="w-full"
+                onClick={handleDraw}
                 disabled={game.participants.length < 3 || isDrawLoading}
                 variant="default"
              >
@@ -197,13 +197,13 @@ export default function GameLobbyPage() {
                 <div className="flex items-center space-x-2">
                     {/* Exclusions (Creator only, in DRAFT) */}
                     {isDraft && isCreator && (
-                        <ExclusionModal 
-                            gameId={game.id} 
-                            participant={participant} 
-                            allParticipants={game.participants} 
+                        <ExclusionModal
+                            gameId={game.id}
+                            participant={participant}
+                            allParticipants={game.participants}
                         />
                     )}
-                    
+
                     {/* Offline Results (Creator only, in COMPLETED) */}
                     {isCompleted && isCreator && participant.isOffline && (
                          <ResultsView gameId={game.id} participant={participant} />
