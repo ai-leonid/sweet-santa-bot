@@ -63,7 +63,10 @@ export default function GameLobbyPage() {
 
   const handleShare = () => {
     if (!game) return;
-    const link = `https://t.me/${process.env.NEXT_PUBLIC_TELEGRAM_BOT_NAME || 'sweet_santa_bot'}?startapp=${game.inviteCode}`;
+    const botName = process.env.NEXT_PUBLIC_TELEGRAM_BOT_NAME || 'sweet_santa_bot';
+    const appShortName = process.env.NEXT_PUBLIC_TELEGRAM_MINI_APP_SHORT_NAME;
+    const path = appShortName ? `${botName}/${appShortName}` : botName;
+    const link = `https://t.me/${path}?startapp=${game.inviteCode}`;
 
     if (webApp) {
         webApp.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(`Присоединяйся к моей игре «Тайный Санта»: ${game.title}!`)}`);

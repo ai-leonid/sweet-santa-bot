@@ -26,34 +26,64 @@ export default function Home() {
   // to prevent double submissions in React Strict Mode or re-renders
   const hasAttemptedJoin = useRef(false);
 
+  async function loadGames() {
+    if (!webApp?.initData) return;
+    setIsLoadingGames(true);
+    try {
+      const result = await getUserGames(webApp.initData);
+      if (result.success && result.games) {
+        setGames(result.games);
+      } else {
+        toast.error('Не удалось загрузить игры');
+      }
+    } catch {
+      toast.error('Ошибка загрузки игр');
+    } finally {
+      setIsLoadingGames(false);
+    }
+  }
+
+  async function handleJoinGame(inviteCode: string) {
+    if (!webApp?.initData) return;
+    setIsJoinProcessing(true);
+
+    const toastId = toast.loading('Присоединение к игре...');
+
+    try {
+      const result = await joinGame(webApp.initData, inviteCode);
+      if (result.success && result.game) {
+        toast.success('Вы присоединились к игре!', { id: toastId });
+        router.push(`/game/${result.game.id}`);
+      } else {
+        toast.error(result.error || 'Не удалось присоединиться к игре', { id: toastId });
+      }
+    } catch {
+      toast.error('Ошибка присоединения к игре', { id: toastId });
+    } finally {
+      setIsJoinProcessing(false);
+    }
+  }
+
   useEffect(() => {
     if (user && webApp) {
-      loadGames();
+      setTimeout(() => {
+        loadGames();
+      }, 0);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, webApp]);
 
   useEffect(() => {
     if (user && webApp && startParam && !isJoinProcessing && !hasAttemptedJoin.current) {
       hasAttemptedJoin.current = true;
-      handleJoinGame(startParam);
+      setTimeout(() => {
+        handleJoinGame(startParam);
+      }, 0);
     }
-  }, [user, webApp, startParam]);
-
-  const loadGames = async () => {
-    if (!webApp?.initData) return;
-    setIsLoadingGames(true);
-    const result = await getUserGames(webApp.initData);
-    if (result.success && result.games) {
-      setGames(result.games);
-    } else {
-      toast.error('Не удалось загрузить игры');
-    }
-    setIsLoadingGames(false);
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, webApp, startParam, isJoinProcessing]);
 
   const handleCreateGame = async () => {
-    console.log('----------HERE ADAF8D7D52DCAE3');
-    console.log(webApp.initData);
     if (!newGameTitle.trim() || !webApp?.initData) return;
 
     setIsCreating(true);
@@ -73,24 +103,6 @@ export default function Home() {
     }
   };
 
-  const handleJoinGame = async (inviteCode: string) => {
-    if (!webApp?.initData) return;
-    setIsJoinProcessing(true);
-
-    // Show a toast that we are joining
-    const toastId = toast.loading('Присоединение к игре...');
-
-    const result = await joinGame(webApp.initData, inviteCode);
-    setIsJoinProcessing(false);
-
-    if (result.success && result.game) {
-      toast.success('Вы присоединились к игре!', { id: toastId });
-      router.push(`/game/${result.game.id}`);
-    } else {
-      toast.error(result.error || 'Не удалось присоединиться к игре', { id: toastId });
-      // If failed, maybe we should just stay on home page
-    }
-  };
 
   if (isAuthLoading || isJoinProcessing) {
     return (
@@ -154,13 +166,12 @@ export default function Home() {
                     {game.title}
                   </CardTitle>
                   {game.status === 'COMPLETED' ? (
-                     <Gift className="h-4 w-4 text-green-500" />
+                    <Gift className="h-4 w-4 text-green-500" />
                   ) : (
-                     <span className={`text-xs px-2 py-1 rounded-full ${
-                        game.status === 'DRAFT' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100' : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100'
-                     }`}>
-                        {statusLabel(game.status)}
-                     </span>
+                    <span className={`text-xs px-2 py-1 rounded-full ${game.status === 'DRAFT' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100' : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100'
+                      }`}>
+                      {statusLabel(game.status)}
+                    </span>
                   )}
                 </CardHeader>
                 <CardContent>

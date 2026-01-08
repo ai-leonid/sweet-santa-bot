@@ -14,7 +14,6 @@ interface ValidatedData {
   auth_date: number;
   query_id?: string;
   hash: string;
-  [key: string]: any;
 }
 
 export function validateTelegramWebAppData(initData: string): ValidatedData | null {

@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+type TelegramWebApp = typeof import('@twa-dev/sdk').default;
 import { getCurrentUser } from '@/app/actions/auth';
 import { User } from '@/app/generated/prisma/client';
 
@@ -9,7 +10,7 @@ interface TelegramContextType {
   isLoading: boolean;
   error: string | null;
   startParam: string | null;
-  webApp?: any;
+  webApp?: TelegramWebApp;
 }
 
 const TelegramContext = createContext<TelegramContextType>({
@@ -27,7 +28,7 @@ export function TelegramProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [startParam, setStartParam] = useState<string | null>(null);
-  const [webApp, setWebApp] = useState<any>(undefined);
+  const [webApp, setWebApp] = useState<TelegramWebApp | undefined>(undefined);
 
   useEffect(() => {
     const init = async () => {
@@ -36,7 +37,7 @@ export function TelegramProvider({ children }: { children: ReactNode }) {
         if (typeof window === 'undefined') return;
 
         // Dynamically import Telegram WebApp SDK
-        const WebApp = (await import('@twa-dev/sdk')).default;
+        const WebApp = (await import('@twa-dev/sdk')).default as TelegramWebApp;
         setWebApp(WebApp);
 
         // Initialize Telegram WebApp

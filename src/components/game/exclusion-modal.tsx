@@ -28,21 +28,18 @@ export function ExclusionModal({ gameId, participant, allParticipants, trigger }
   const [isMutual, setIsMutual] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
 
-  useEffect(() => {
-    if (isOpen && webApp?.initData) {
-      loadExclusions();
-    }
-  }, [isOpen, webApp]);
-
-  const loadExclusions = async () => {
+  function loadExclusions() {
     if (!webApp?.initData) return;
     setIsLoading(true);
-    const result = await getExclusions(webApp.initData, gameId, participant.id);
-    if (result.success && result.exclusions) {
-      setExclusions(result.exclusions);
-    }
-    setIsLoading(false);
-  };
+    getExclusions(webApp.initData, gameId, participant.id).then((result) => {
+      if (result.success && result.exclusions) {
+        setExclusions(result.exclusions);
+      }
+      setIsLoading(false);
+    });
+  }
+
+  useEffect(() => {}, []);
 
   const handleAdd = async () => {
     if (!webApp?.initData || !selectedParticipantId) return;
@@ -87,7 +84,15 @@ export function ExclusionModal({ gameId, participant, allParticipants, trigger }
   );
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        setIsOpen(open);
+        if (open && webApp?.initData) {
+          loadExclusions();
+        }
+      }}
+    >
       <DialogTrigger asChild>
         {trigger || <Button variant="outline" size="sm"><Ban className="h-4 w-4" /></Button>}
       </DialogTrigger>
